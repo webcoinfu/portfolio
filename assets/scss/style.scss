@@ -1,28 +1,4 @@
-// @import 'variable';
-
-// @import '../../node_modules/font-awesome/scss/font-awesome.scss';
-
-// Bootstrap
-// @import '../../node_modules/bootstrap/scss/bootstrap';
-
-// Now UI Kit
-// @import '../../node_modules/now-ui-kit/assets/sass/now-ui-kit';
-
-// Bootstrap
-@import '../../node_modules/stream/assets/include/scss/vendors/bootstrap/bootstrap.scss';
-
-// Stream UI Kit
-@import '../../node_modules/stream/assets/include/scss/styles.scss';
-
-@import '../../node_modules/stream/assets/vendors/magnific-popup/magnific-popup';
-
-.avatar {
-	@extend .img-fluid; 
-	@extend .u-avatar;
-	@extend .u-box-shadow-lg;
-	@extend .rounded-circle;
-	@extend .mb-3;
-}
+@import '../../node_modules/bulma/bulma';
 
 // Lazysizes
 .lazyload,
