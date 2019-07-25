@@ -5,17 +5,17 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     concat = require('gulp-concat'),
     notify = require('gulp-notify'),
-    merge = require('merge-stream'),
     foreach = require('gulp-flatmap'),
     browserSync = require('browser-sync').create(),
     cp = require('child_process'),
     autoprefixer = require('autoprefixer'),
     cssnano = require('cssnano'),
     cmq = require('css-mqpacker'),
-    gulpCopy = require('gulp-copy'),
     changed = require('gulp-changed'),
-    through = require('through2'),
+    Fiber = require('fibers');
     jekyll = process.platform === 'win32' ? 'jekyll.bat' : 'jekyll';
+
+sass.compiler = require('sass');
 
 var plugins = [
     autoprefixer,
@@ -64,14 +64,13 @@ var paths = {
 };
 
 function jekyllBuild() {
-    // return cp.spawn( jekyll, ['build'], {stdio: 'inherit'})
     return cp.spawn("bundle", ["exec", "jekyll", "build"], { stdio: "inherit" });
 }
 
 function style() {
     return gulp.src(paths.styles.src)
         .pipe(changed(paths.styles.dest))
-        .pipe(sass.sync().on('error', sass.logError))
+        .pipe(sass({fiber: Fiber}).on('error', sass.logError))
         .pipe(concat('app.scss'))
         .pipe(postcss(plugins))
         .pipe(rename('app.css'))
@@ -120,6 +119,7 @@ function browserSyncReload(done) {
 function watch() {
     gulp.watch(['assets/scss/style.scss', 'assets/scss/**/**/*.scss'], style).on('change', browserSync.reload)
     gulp.watch(paths.scripts.src, gulp.series(js, jsMinified))
+    // gulp.watch(paths.)
     gulp.watch(
     [
         '*.html', 
@@ -133,3 +133,4 @@ function watch() {
 }
 
 gulp.task('default', gulp.parallel(jekyllBuild, style, gulp.series(js, jsMinified), browserSyncServe, watch))
+// gulp.task('default', gulp.parallel(jekyllBuild, style, browserSyncServe, watch))
