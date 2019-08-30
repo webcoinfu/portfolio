@@ -11,6 +11,7 @@ var gulp = require('gulp'),
     autoprefixer = require('autoprefixer'),
     cssnano = require('cssnano'),
     changed = require('gulp-changed'),
+    critical = require('critical'),
     jekyll = process.platform === 'win32' ? 'jekyll.bat' : 'jekyll';
 
 var plugins = [
@@ -31,22 +32,22 @@ var paths = {
     },
     scripts: {
         src: [
-            'node_modules/stream/assets/vendors/bootstrap/js/bootstrap.js',
-            'node_modules/stream/assets/js/global.js',
-            'node_modules/stream/assets/vendors/magnific-popup/jquery.magnific-popup.js',
-            'node_modules/lazysizes/lazysizes.js',
-            'node_modules/stream/assets/vendors/jquery.parallax.js',
-            'node_modules/stream/assets/js/vendors/parallax.js',
-            'node_modules/stream/assets/js/vendors/shuffle.js',
-            'node_modules/stream/assets/js/vendors/magnific-popup.js'
+            // 'node_modules/stream/assets/vendors/bootstrap/js/bootstrap.js',
+            // 'node_modules/stream/assets/js/global.js',
+            // 'node_modules/stream/assets/vendors/magnific-popup/jquery.magnific-popup.js',
+            // 'node_modules/lazysizes/lazysizes.js',
+            // 'node_modules/stream/assets/vendors/jquery.parallax.js',
+            // 'node_modules/stream/assets/js/vendors/parallax.js',
+            // 'node_modules/stream/assets/js/vendors/shuffle.js',
+            // 'node_modules/stream/assets/js/vendors/magnific-popup.js'
         ],
         minified: [
-            'node_modules/stream/assets/vendors/popper.min.js',
-            'node_modules/stream/assets/vendors/jquery.min.js',
-            'node_modules/stream/assets/vendors/jquery.migrate.min.js',
-            'node_modules/stream/assets/vendors/jquery.back-to-top.min.js',
-            'node_modules/stream/assets/vendors/jquery.smooth-scroll.min.js',
-            'node_modules/stream/assets/vendors/shuffle/jquery.shuffle.min.js'
+            // 'node_modules/stream/assets/vendors/popper.min.js',
+            // 'node_modules/stream/assets/vendors/jquery.min.js',
+            // 'node_modules/stream/assets/vendors/jquery.migrate.min.js',
+            // 'node_modules/stream/assets/vendors/jquery.back-to-top.min.js',
+            // 'node_modules/stream/assets/vendors/jquery.smooth-scroll.min.js',
+            // 'node_modules/stream/assets/vendors/shuffle/jquery.shuffle.min.js'
         ],
         dest: 'assets/js'
     },
@@ -77,29 +78,41 @@ function style() {
         }));
 }
 
-function js() {
-    return gulp.src(paths.scripts.src)
-    .pipe(foreach(function(stream, file){
-        return stream
-            .pipe(uglify())
-            .pipe(rename({suffix: '.min'}))
-    }))
-    .pipe(gulp.dest(paths.scripts.dest))
-    .pipe(browserSync.stream())
-    .pipe(notify({ 
-        'message': 'Scripts task complete' 
-    }));
+function criticalCss() {
+    critical.generate({
+        base: './',
+        src: '_site/index.html',
+        css: '_site/assets/css/app.css',
+        dest: '_includes/critical.css',
+        width: 320,
+        height: 480,
+        minify: true
+    });
 }
 
-function jsMinified() {
-    return gulp.src(paths.scripts.minified)
-        .pipe(changed(paths.scripts.dest))
-        .pipe(gulp.dest(paths.scripts.dest))
-        .pipe(browserSync.stream())
-        .pipe(notify({
-            'message': 'Minified scripts task complete' 
-        }));
-}
+// function js() {
+//     return gulp.src(paths.scripts.src)
+//     .pipe(foreach(function(stream, file){
+//         return stream
+//             .pipe(uglify())
+//             .pipe(rename({suffix: '.min'}))
+//     }))
+//     .pipe(gulp.dest(paths.scripts.dest))
+//     .pipe(browserSync.stream())
+//     .pipe(notify({ 
+//         'message': 'Scripts task complete' 
+//     }));
+// }
+
+// function jsMinified() {
+//     return gulp.src(paths.scripts.minified)
+//         .pipe(changed(paths.scripts.dest))
+//         .pipe(gulp.dest(paths.scripts.dest))
+//         .pipe(browserSync.stream())
+//         .pipe(notify({
+//             'message': 'Minified scripts task complete' 
+//         }));
+// }
 
 function browserSyncServe(done) {
     browserSync.init({
@@ -120,7 +133,7 @@ function browserSyncReload(done) {
 
 function watch() {
     gulp.watch(['assets/scss/style.scss', 'assets/scss/**/**/*.scss'], style).on('change', browserSync.reload)
-    gulp.watch(paths.scripts.src, gulp.series(js, jsMinified))
+    // gulp.watch(paths.scripts.src, gulp.series(js, jsMinified))
     gulp.watch(
     [
         '*.html', 
@@ -133,4 +146,6 @@ function watch() {
     gulp.series(jekyllBuild, browserSyncReload));
 }
 
-gulp.task('default', gulp.parallel(jekyllBuild, style, gulp.series(js, jsMinified), browserSyncServe, watch))
+// gulp.task('default', gulp.parallel(jekyllBuild, style, gulp.series(js, jsMinified), browserSyncServe, watch))
+
+gulp.task('default', gulp.parallel(jekyllBuild, style, criticalCss, browserSyncServe, watch))
